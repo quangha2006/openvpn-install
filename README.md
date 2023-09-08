@@ -343,6 +343,15 @@ So both provide an additional layer of security and mitigate DoS attacks. They a
 
 The script supports both and uses `tls-crypt` by default.
 
+## Renew server certificate
+```
+cd /etc/openvpn/easy-rsa
+sudo ./easyrsa renew server_xyzblablabla
+# or
+sudo ./easyrsa renew server_xyzblablabla nopass
+```
+[https://github.com/angristan/openvpn-install/issues/1002](https://github.com/angristan/openvpn-install/issues/1002)
+
 ## Say thanks
 
 You can [say thanks](https://saythanks.io/to/angristan) if you want!
