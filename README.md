@@ -1,9 +1,5 @@
 # openvpn-install
 
-![Test](https://github.com/angristan/openvpn-install/workflows/Test/badge.svg)
-![Lint](https://github.com/angristan/openvpn-install/workflows/Lint/badge.svg)
-[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/angristan)
-
 OpenVPN installer for Debian, Ubuntu, Fedora, CentOS, Arch Linux, Oracle Linux, Rocky Linux and AlmaLinux.
 
 This script will let you setup your own secure VPN server in just a few seconds.
@@ -346,9 +342,12 @@ The script supports both and uses `tls-crypt` by default.
 ## Renew server certificate
 ```
 cd /etc/openvpn/easy-rsa
-sudo ./easyrsa renew server_xyzblablabla
+sudo ./easyrsa renew server_[YOUR_SERVER_CODE]
 # or
-sudo ./easyrsa renew server_xyzblablabla nopass
+sudo ./easyrsa renew server_[YOUR_SERVER_CODE] nopass
+# and then ... (maybe you have to copy the keys to correct folder)
+cp pki/issued/server_[YOUR_SERVER_CODE].crt ../
+cp pki/private/server_[YOUR_SERVER_CODE].key ../
 ```
 [https://github.com/angristan/openvpn-install/issues/1002](https://github.com/angristan/openvpn-install/issues/1002)
 
@@ -361,7 +360,3 @@ You can [say thanks](https://saythanks.io/to/angristan) if you want!
 Many thanks to the [contributors](https://github.com/Angristan/OpenVPN-install/graphs/contributors) and Nyr's original work.
 
 This project is under the [MIT Licence](https://raw.githubusercontent.com/Angristan/openvpn-install/master/LICENSE)
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=angristan/openvpn-install&type=Date)](https://star-history.com/#angristan/openvpn-install&Date)
