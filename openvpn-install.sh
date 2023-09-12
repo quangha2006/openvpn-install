@@ -2,7 +2,7 @@
 # shellcheck disable=SC1091,SC2164,SC2034,SC1072,SC1073,SC1009
 
 # Secure OpenVPN server installer for Debian, Ubuntu, CentOS, Amazon Linux 2, Fedora, Oracle Linux 8, Arch Linux, Rocky Linux and AlmaLinux.
-# https://github.com/angristan/openvpn-install
+# https://github.com/quangha2006/openvpn-install
 
 function isRoot() {
 	if [ "$EUID" -ne 0 ]; then
@@ -218,7 +218,7 @@ access-control: fd42:42:42:42::/112 allow' >>/etc/unbound/openvpn.conf
 
 function installQuestions() {
 	echo "Welcome to the OpenVPN installer!"
-	echo "The git repository is available at: https://github.com/angristan/openvpn-install"
+	echo "The git repository is available at: https://github.com/quangha2006/openvpn-install"
 	echo ""
 
 	echo "I need to ask you a few questions before starting the setup."
@@ -602,6 +602,10 @@ function installQuestions() {
 		done
 	fi
 	echo ""
+	until [[ $CERT_EXPIRE =~ ^[0-9]+$ ]] && [ "$CERT_EXPIRE" -ge 30 ] && [ "$CERT_EXPIRE" -le 3650 ]; do
+		read -rp "In how many days should certificates expire? [30-7300]: " -e -i 3650 CERT_EXPIRE
+	done
+	echo ""
 	echo "Okay, that was all I needed. We are ready to setup your OpenVPN server now."
 	echo "You will be able to generate a client at the end of the installation."
 	APPROVE_INSTALL=${APPROVE_INSTALL:-n}
@@ -717,9 +721,11 @@ function installOpenVPN() {
 		1)
 			echo "set_var EASYRSA_ALGO ec" >vars
 			echo "set_var EASYRSA_CURVE $CERT_CURVE" >>vars
+			echo "set_var EASYRSA_CERT_EXPIRE $CERT_EXPIRE" >>vars
 			;;
 		2)
 			echo "set_var EASYRSA_KEY_SIZE $RSA_KEY_SIZE" >vars
+			echo "set_var EASYRSA_CERT_EXPIRE $CERT_EXPIRE" >>vars
 			;;
 		esac
 
@@ -1076,6 +1082,12 @@ function newClient() {
 		read -rp "Select an option [1-2]: " -e -i 1 PASS
 	done
 
+	echo ""
+	until [[ $CERT_EXPIRE =~ ^[0-9]+$ ]] && [ "$CERT_EXPIRE" -ge 30 ] && [ "$CERT_EXPIRE" -le 3650 ]; do
+		read -rp "In how many days should certificates expire? [30-7300]: " -e -i 3650 CERT_EXPIRE
+	done
+	echo ""
+
 	CLIENTEXISTS=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep -c -E "/CN=$CLIENT\$")
 	if [[ $CLIENTEXISTS == '1' ]]; then
 		echo ""
@@ -1085,11 +1097,11 @@ function newClient() {
 		cd /etc/openvpn/easy-rsa/ || return
 		case $PASS in
 		1)
-			./easyrsa --batch build-client-full "$CLIENT" nopass
+			EASYRSA_CERT_EXPIRE=$CERT_EXPIRE ./easyrsa --batch build-client-full "$CLIENT" nopass
 			;;
 		2)
 			echo "⚠️ You will be asked for the client password below ⚠️"
-			./easyrsa --batch build-client-full "$CLIENT"
+			EASYRSA_CERT_EXPIRE=$CERT_EXPIRE ./easyrsa --batch build-client-full "$CLIENT"
 			;;
 		esac
 		echo "Client $CLIENT added."
