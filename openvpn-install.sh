@@ -57,7 +57,7 @@ function checkOS() {
 		fi
 		if [[ $ID == "centos" || $ID == "rocky" || $ID == "almalinux" ]]; then
 			OS="centos"
-			if [[ $VERSION_ID -lt 7 ]]; then
+			if [[ ${VERSION_ID%.*} -lt 7 ]]; then
 				echo "⚠️ Your version of CentOS is not supported."
 				echo ""
 				echo "The script only support CentOS 7 and CentOS 8."
@@ -721,11 +721,9 @@ function installOpenVPN() {
 		1)
 			echo "set_var EASYRSA_ALGO ec" >vars
 			echo "set_var EASYRSA_CURVE $CERT_CURVE" >>vars
-			echo "set_var EASYRSA_CERT_EXPIRE $CERT_EXPIRE" >>vars
 			;;
 		2)
 			echo "set_var EASYRSA_KEY_SIZE $RSA_KEY_SIZE" >vars
-			echo "set_var EASYRSA_CERT_EXPIRE $CERT_EXPIRE" >>vars
 			;;
 		esac
 
@@ -737,14 +735,14 @@ function installOpenVPN() {
 
 		# Create the PKI, set up the CA, the DH params and the server certificate
 		./easyrsa init-pki
-		./easyrsa --batch --req-cn="$SERVER_CN" build-ca nopass
+		EASYRSA_CA_EXPIRE=$CERT_EXPIRE ./easyrsa --batch --req-cn="$SERVER_CN" build-ca nopass
 
 		if [[ $DH_TYPE == "2" ]]; then
 			# ECDH keys are generated on-the-fly so we don't need to generate them beforehand
 			openssl dhparam -out dh.pem $DH_KEY_SIZE
 		fi
 
-		./easyrsa --batch build-server-full "$SERVER_NAME" nopass
+		EASYRSA_CERT_EXPIRE=$CERT_EXPIRE ./easyrsa --batch build-server-full "$SERVER_NAME" nopass
 		EASYRSA_CRL_DAYS=3650 ./easyrsa gen-crl
 
 		case $TLS_SIG in
@@ -1083,7 +1081,7 @@ function newClient() {
 	done
 
 	echo ""
-	until [[ $CERT_EXPIRE =~ ^[0-9]+$ ]] && [ "$CERT_EXPIRE" -ge 30 ] && [ "$CERT_EXPIRE" -le 3650 ]; do
+	until [[ $CERT_EXPIRE =~ ^[0-9]+$ ]] && [ "$CERT_EXPIRE" -ge 30 ] && [ "$CERT_EXPIRE" -le 7300 ]; do
 		read -rp "In how many days should certificates expire? [30-7300]: " -e -i 3650 CERT_EXPIRE
 	done
 	echo ""
