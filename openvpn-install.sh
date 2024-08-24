@@ -602,7 +602,7 @@ function installQuestions() {
 		done
 	fi
 	echo ""
-	until [[ $CERT_EXPIRE =~ ^[0-9]+$ ]] && [ "$CERT_EXPIRE" -ge 30 ] && [ "$CERT_EXPIRE" -le 3650 ]; do
+	until [[ $CERT_EXPIRE =~ ^[0-9]+$ ]] && [ "$CERT_EXPIRE" -ge 30 ] && [ "$CERT_EXPIRE" -le 7300 ]; do
 		read -rp "In how many days should certificates expire? [30-7300]: " -e -i 3650 CERT_EXPIRE
 	done
 	echo ""
